@@ -194,12 +194,15 @@ test('toExportPayload 结构稳定', () => {
 /* -------------------------------- snapshot ------------------------------- */
 
 test('buildSnapshot 生成结构完整的 Markdown', () => {
+  const at = new Date(2026, 9, 16, 22, 22).getTime();
   const list = [
     createMemory({ role: 'user', content: '我 2026 年高考', tags: ['个人信息'], weight: 3 }),
     createMemory({ role: 'ai', content: '建议冲稳保三档', tags: ['志愿填报'], weight: 2 })
   ];
+  // 固定时间戳：否则下面断言里的日期会跟着「今天是几号」变，零点一过就挂（CI 上就踩过）
+  list.forEach(function (m) { m.createdAt = at; m.updatedAt = at; });
   list[0].pinned = true;
-  const text = buildSnapshot(list, { now: new Date(2026, 9, 16, 22, 22).getTime() });
+  const text = buildSnapshot(list, { now: at });
 
   assert.match(text, /^# AI 上下文快照（由 AI 记忆库生成）/);
   assert.match(text, /生成时间：2026-10-16 22:22/);

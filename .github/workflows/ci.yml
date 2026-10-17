@@ -13,6 +13,9 @@ jobs:
   verify:
     name: 构建 / 自检 / 单元测试 / 浏览器 E2E
     runs-on: ubuntu-latest
+    env:
+      # 固定时区，让任何依赖本地时间的断言保持一致（踩过坑：断言里的日期过了零点就变）
+      TZ: UTC
     steps:
       - uses: actions/checkout@v4
 
