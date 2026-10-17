@@ -1,0 +1,22 @@
+# 依赖与产物
+node_modules/
+dist/
+*.log
+npm-debug.log*
+
+# 编辑器 / 系统
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 本地记忆数据（千万别把真实记忆提交上来）
+ai-memory-vault-*.json
+ai-context-snapshot-*.md
+*.local.json
+
+# 测试与截图临时文件
+.tmp/
+coverage/

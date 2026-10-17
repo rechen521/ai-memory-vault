@@ -1,0 +1,48 @@
+{
+  "name": "ai-memory-vault",
+  "version": "1.0.0",
+  "private": false,
+  "description": "AI 记忆库 · Memory Vault —— 把关键对话固化成本地记忆，一键生成上下文快照，防止上下文丢失导致的错误。零依赖单文件 Web 应用。",
+  "keywords": [
+    "ai",
+    "memory",
+    "context",
+    "llm",
+    "chatgpt",
+    "claude",
+    "local-first",
+    "single-file",
+    "prompt",
+    "context-snapshot"
+  ],
+  "type": "module",
+  "license": "MIT",
+  "author": "rechen521",
+  "homepage": "https://rechen521.github.io/ai-memory-vault/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rechen521/ai-memory-vault.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rechen521/ai-memory-vault/issues"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "dist",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "check": "node scripts/check.mjs",
+    "dev": "node scripts/serve.mjs",
+    "test": "node --test tests/unit.test.mjs",
+    "test:e2e": "node tests/e2e.mjs",
+    "test:file": "node tests/file-protocol.mjs",
+    "shots": "node scripts/shots.mjs",
+    "verify": "npm run build && npm run check && npm test && npm run test:e2e && npm run test:file"
+  }
+}

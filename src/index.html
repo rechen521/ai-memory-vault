@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<meta name="description" content="AI 记忆库 · Memory Vault —— 把关键对话固化成本地记忆，一键生成上下文快照，防止上下文丢失导致的错误。Conversation-based AI memory: saves chat history and extracts long-term facts, so the AI can remember you across sessions.">
+<title>AI 记忆库 · Memory Vault</title>
+<!-- build:css -->
+<link rel="stylesheet" href="./styles.css">
+<!-- /build:css -->
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo" aria-hidden="true">✦</div>
+      <div>
+        <h1>AI 记忆库</h1>
+        <p>Memory Vault · 把关键对话固化下来，上下文丢了也不怕</p>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="badge warn" id="storageBadge" type="button" title="建议点击「绑定本地文件」落盘备份">仅浏览器存储</button>
+      <button class="btn ghost" id="btnBind" type="button">绑定本地文件</button>
+      <button class="btn ghost" id="btnImport" type="button">导入</button>
+      <button class="btn ghost" id="btnExport" type="button">导出</button>
+      <input type="file" id="fileInput" accept=".json,application/json" hidden>
+    </div>
+  </header>
+
+  <main class="grid">
+    <aside class="panel">
+      <section class="card">
+        <h2>新建记忆</h2>
+        <div class="seg" id="roleSeg" role="group" aria-label="记忆角色">
+          <button class="seg-btn active" type="button" data-role="user" aria-pressed="true">用户说</button>
+          <button class="seg-btn" type="button" data-role="ai" aria-pressed="false">AI 说</button>
+        </div>
+        <textarea id="contentInput" class="input" rows="5" maxlength="20000" aria-label="记忆内容" placeholder="把需要长期记住的内容写在这里，例如：用户在 2026 年参加高考，物理方向，正在做志愿填报分析…&#10;&#10;Ctrl / ⌘ + Enter 快速保存"></textarea>
+        <input id="tagInput" class="input" maxlength="200" aria-label="标签" placeholder="标签，逗号分隔，如：志愿填报,偏好">
+        <div class="row">
+          <span class="label" id="weightLabel">重要度</span>
+          <div class="stars" id="stars" role="group" aria-labelledby="weightLabel">
+            <button class="star" type="button" data-w="1" aria-label="重要度 1 星" aria-pressed="false">★</button>
+            <button class="star" type="button" data-w="2" aria-label="重要度 2 星" aria-pressed="true">★</button>
+            <button class="star" type="button" data-w="3" aria-label="重要度 3 星" aria-pressed="false">★</button>
+          </div>
+        </div>
+        <button class="btn primary block" id="btnAdd" type="button">保存记忆</button>
+      </section>
+
+      <section class="card">
+        <details>
+          <summary>批量导入整段对话</summary>
+          <textarea id="bulkInput" class="input" rows="7" aria-label="批量对话内容" placeholder="粘贴对话，每行以 用户：/ AI： 开头即可自动切分&#10;&#10;用户：我 2026 年高考&#10;AI：好的，我来帮你分析…"></textarea>
+          <button class="btn ghost block" id="btnBulk" type="button">解析并全部保存</button>
+        </details>
+      </section>
+
+      <section class="card stats" id="stats" aria-label="记忆统计"></section>
+    </aside>
+
+    <section class="content">
+      <div class="toolbar">
+        <input id="search" class="input" type="search" aria-label="搜索记忆" placeholder="搜索记忆内容 / 标签…">
+        <select id="tagFilter" class="input" aria-label="按标签筛选"><option value="">全部标签</option></select>
+        <select id="sortSel" class="input" aria-label="排序方式">
+          <option value="smart">智能排序</option>
+          <option value="new">最新优先</option>
+          <option value="old">最早优先</option>
+        </select>
+        <button class="btn primary" id="btnSnapshot" type="button">生成上下文快照</button>
+      </div>
+      <div class="list" id="list" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <span>数据只存在你的浏览器与本地文件中，不上传任何服务器。</span>
+    <span class="foot-sep">·</span>
+    <a href="https://github.com/rechen521/ai-memory-vault" id="repoLink" target="_blank" rel="noopener">GitHub</a>
+  </footer>
+</div>
+
+<div class="modal-mask" id="snapMask" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="snapTitle">
+    <header>
+      <h3 id="snapTitle">上下文快照</h3>
+      <button class="icon-btn" type="button" data-close="snapMask" aria-label="关闭">✕</button>
+    </header>
+    <p class="hint">把下面整段粘贴到新对话的开头，可最大程度避免上下文丢失带来的错误。</p>
+    <pre id="snapText"></pre>
+    <div class="modal-actions">
+      <button class="btn ghost" id="btnCopySnap" type="button">复制</button>
+      <button class="btn ghost" id="btnDownloadSnap" type="button">下载 .md</button>
+      <button class="btn primary" type="button" data-close="snapMask">完成</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-mask" id="wishMask" hidden>
+  <div class="modal wish" role="dialog" aria-modal="true" aria-labelledby="wishText">
+    <div class="wish-glow" aria-hidden="true"></div>
+    <div class="wish-mark" aria-hidden="true">✦ ✦ ✦</div>
+    <p class="wish-en" id="wishText">May you one day be reunited<br>with the people who matter most to you.</p>
+    <button class="btn primary" type="button" data-close="wishMask">Close</button>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<!-- build:js -->
+<script type="module" src="./js/main.js"></script>
+<!-- /build:js -->
+</body>
+</html>

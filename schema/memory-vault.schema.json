@@ -1,0 +1,62 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/rechen521/ai-memory-vault/schema/memory-vault.schema.json",
+  "title": "AI 记忆库导出文件",
+  "description": "AI 记忆库 · Memory Vault 的 JSON 导出 / 本地落盘格式。导入时解析器有额外容错，见 docs/data-format.md。",
+  "type": "object",
+  "required": ["memories"],
+  "properties": {
+    "app": {
+      "type": "string",
+      "const": "ai-memory-vault"
+    },
+    "version": {
+      "type": "integer",
+      "const": 1
+    },
+    "exportedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "memories": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/memory" }
+    }
+  },
+  "definitions": {
+    "memory": {
+      "type": "object",
+      "required": ["content"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 40,
+          "pattern": "^[A-Za-z0-9_-]*$",
+          "description": "只允许 A-Za-z0-9_-，导入时其它字符会被剥离"
+        },
+        "role": {
+          "type": "string",
+          "enum": ["user", "ai"]
+        },
+        "content": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 20000
+        },
+        "tags": {
+          "type": "array",
+          "maxItems": 12,
+          "items": { "type": "string", "maxLength": 24 }
+        },
+        "weight": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3
+        },
+        "pinned": { "type": "boolean" },
+        "createdAt": { "type": "integer", "minimum": 0 },
+        "updatedAt": { "type": "integer", "minimum": 0 }
+      }
+    }
+  }
+}
