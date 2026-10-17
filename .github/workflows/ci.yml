@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: 构建 / 自检 / 单元测试 / 浏览器 E2E
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 准备 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # 本项目运行时与开发时都是零依赖，不需要 npm install
+      - name: 构建单文件产物
+        run: npm run build
+
+      - name: 静态自检
+        run: npm run check
+
+      - name: 单元测试
+        run: npm test
+
+      - name: 浏览器端到端测试
+        # GitHub 托管 runner 自带 google-chrome，tests/lib/browser.mjs 会自动探测
+        run: npm run test:e2e
+        env:
+          REQUIRE_BROWSER: '1'
+
+      - name: file:// 双击可用性测试
+        run: npm run test:file
+
+      - name: 上传构建产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-memory-vault-single-file
+          path: dist/
+          if-no-files-found: error
